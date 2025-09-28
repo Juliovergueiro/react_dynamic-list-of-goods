@@ -1,29 +1,49 @@
 import { Good } from '../types/Good';
 
-// Único endpoint do servidor — carrega TODOS os goods
-const API_URL =
-  'https://mate-academy.github.io/react_dynamic-list-of-goods/goods.json';
+// eslint-disable-next-line
+const API_URL = `https://mate-academy.github.io/react_dynamic-list-of-goods/goods.json`;
 
-export function getAll(): Promise<Good[]> {
-  return fetch(API_URL).then(res => {
-    if (!res.ok) {
-      throw new Error('Failed to load goods');
-    }
+// Função para simular atraso, útil para exibir Loader
+const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-    return res.json();
-  });
+// Retorna a lista completa de produtos
+export async function getAllGoods(): Promise<Good[]> {
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    await wait(500); // delay artificial para mostrar Loader
+
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
 }
 
-// Carrega todos, ordena por nome (A→Z) e retorna os 5 primeiros
-export function get5First(): Promise<Good[]> {
-  return getAll().then(goods => {
-    return [...goods].sort((a, b) => a.name.localeCompare(b.name)).slice(0, 5);
-  });
+// Retorna os 5 primeiros produtos ordenados por nome
+export async function getFirstFiveSortedByName(): Promise<Good[]> {
+  try {
+    const goods = await getAllGoods();
+
+    return [...goods]
+      .sort((a, b) =>
+        (a.name ?? '').toString().localeCompare((b.name ?? '').toString()),
+      )
+      .slice(0, 5);
+  } catch {
+    return [];
+  }
 }
 
-// Carrega todos e filtra apenas os vermelhos
-export function getRedGoods(): Promise<Good[]> {
-  return getAll().then(goods => {
-    return goods.filter(g => g.color.toLowerCase() === 'red');
-  });
+// Retorna apenas os produtos vermelhos
+export async function getRedGoods(): Promise<Good[]> {
+  try {
+    const goods = await getAllGoods();
+
+    return goods.filter(
+      g => (g.color ?? '').toString().toLowerCase() === 'red',
+    );
+  } catch {
+    return [];
+  }
 }
